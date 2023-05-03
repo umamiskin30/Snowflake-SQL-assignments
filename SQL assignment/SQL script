@@ -1,0 +1,95 @@
+CREATE DATABASE UM_MYSQL;
+USE DATABASE UM_MYSQL;
+
+--1. Load the given dataset into snowflake with a primary key to Order Date column.
+
+CREATE OR REPLACE TABLE UM_SALES_DATA
+(
+ORDER_ID STRING,
+ORDER_DATE DATE NOT NULL PRIMARY KEY,
+SHIP_DATE DATE,
+SHIP_MODE CHAR(30),
+CUSTOMER_NAME VARCHAR2(50),
+SEGMENT CHAR(20),
+STATE VARCHAR2(50),
+COUNTRY VARCHAR(40),
+MARKET CHAR(15),
+REGION CHAR(15),
+PRODUCT_ID VARCHAR2(100),
+CATEGORY VARCHAR(40),
+SUB_PRODUCT VARCHAR(40),
+PRODUCT_NAME VARCHAR2(210),
+SALES NUMBER(10,0),
+QUANTITY NUMBER(5),
+DISCOUNT FLOAT,
+PROFIT FLOAT,
+SHIPPING_COST FLOAT,
+ORDER_PRIOPRITY CHAR(10),
+YEAR INT
+);
+
+DESCRIBE TABLE UM_SALES_DATA;
+
+SELECT * FROM UM_SALES_DATA;
+
+--2. Change the Primary key to Order Id Column.
+
+ALTER TABLE UM_SALES_DATA
+DROP PRIMARY KEY;
+
+ALTER TABLE UM_SALES_DATA 
+ADD PRIMARY KEY (ORDER_ID);
+
+DESCRIBE TABLE UM_SALES_DATA;
+
+--3. Check the data type for Order date and Ship date and mention in what data type it should be?
+
+SELECT GET_DDL('TABLE','UM_SALES_DATA');
+
+
+--4. Create a new column called order_extract and extract the number after the last ‘–‘from Order ID column.
+
+CREATE OR REPLACE TABLE UM_SALES_DATA_CO AS
+SELECT *, SPLIT_PART(ORDER_ID,'-',3) AS ORDER_EXTRACT FROM UM_SALES_DATA;
+
+SELECT * FROM UM_SALES_DATA_CO;
+
+
+--5. Create a new column called Discount Flag and categorize it based on discount.Use ‘Yes’ if the discount is greater than zero else ‘No’.
+
+SELECT *,
+        CASE
+        WHEN DISCOUNT>0 THEN 'YES'
+        ELSE 'NO'
+        END AS DISCOUNT_FLAG
+FROM UM_SALES_DATA_CO;        
+
+
+--6. Create a new column called process days and calculate how many days it takes for each order id to process from the order to its shipment.
+
+CREATE OR REPLACE TABLE UM_SALES_DATA_CO AS
+SELECT *, DATEDIFF(DD,ORDER_DATE,SHIP_DATE )AS PROCESS_DAYS FROM UM_SALES_DATA_CO;
+
+SELECT * FROM UM_SALES_DATA_CO;
+ 
+ 
+--7.
+/* 
+ Create a new column called Rating and then based on the Process dates give rating like given below.
+a. If process days less than or equal to 3days then rating should be 5
+b. If process days are greater than 3 and less than or equal to 6 then rating
+should be 4
+c. If process days are greater than 6 and less than or equal to 10 then rating
+should be 3
+d. If process days are greater than 10 then the rating should be 2.
+*/
+
+CREATE OR REPLACE TABLE UM_SALES_DATA_CO AS
+SELECT *,
+        CASE
+        WHEN PROCESS_DAYS <= 3 THEN 5
+        WHEN PROCESS_DAYS > 3 <= 6 THEN 4
+        WHEN PROCESS_DAYS > 6 <= 10 THEN 3
+        ELSE 2
+        END AS RATINGS
+FROM UM_SALES_DATA_CO;
