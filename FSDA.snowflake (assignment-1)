@@ -1,0 +1,122 @@
+--TASK !
+
+CREATE DATABASE iNEURON_TASKS;
+USE iNEURON_TASKS;
+
+CREATE OR REPLACE TABLE Shopping_history(
+product VARCHAR(40) NOT NULL,
+quantity INT NOT NULL,
+unit_price INT NOT NULL
+);
+
+INSERT INTO Shopping_history VALUES
+('Milk',3,10),
+('Bread',7,3),
+('Bread',5,2);
+
+SELECT * FROM Shopping_history;
+
+WITH CTE AS
+(SELECT product,(quantity * unit_price) AS Total_price
+FROM Shopping_history)
+SELECT DISTINCT product,SUM(Total_price)
+FROM CTE
+GROUP BY 1
+ORDER BY 1;
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+--Task 2
+
+CREATE OR REPLACE TABLE Phones(
+Name VARCHAR(20) NOT NULL UNIQUE,
+Phone_number INT NOT NULL UNIQUE
+);
+
+INSERT INTO Phones VALUES
+('Jack',1234),
+('Lena',3333),
+('Mark',9999),
+('Anna',7582);
+
+CREATE OR REPLACE TABLE Calls(
+ID INT NOT NULL,
+Caller INT NOT NULL,
+Callee INT NOT NULL,
+Duration INT NOT NULL,
+UNIQUE(ID)
+);
+
+INSERT INTO Calls VALUES
+(25,1234,7582,8),
+(7,9999,7582,1),
+(18,9999,3333,4),
+(2,7582,3333,3),
+(3,3333,1234,1),
+(21,3333,1234,1);
+
+SELECT * FROM Phones;
+SELECT * FROM Calls;
+
+SELECT NAME FROM (
+ WITH Caller_dur AS
+     (SELECT Caller AS Phone_number ,SUM(Duration) AS Total_time
+      FROM calls
+      GROUP BY 1
+      UNION
+      SELECT Callee AS Phone_number,SUM(Duration) AS Total_time
+      FROM calls
+      GROUP BY 1 )
+ SELECT DISTINCT (B.Name), SUM(A.Total_time) AS Total_time
+ FROM Caller_dur AS A
+ JOIN Phones AS B ON A.Phone_number = B.Phone_number
+ GROUP BY 1
+ ORDER BY 1)
+WHERE Total_time >= 10;
+
+----------------------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE TABLE phones1 (
+Name VARCHAR(20) NOT NULL UNIQUE,
+Phone_number INT NOT NULL UNIQUE
+);
+
+INSERT INTO phones1 VALUES
+('John',6356),
+('Addison',4315),
+('Kate',8003),
+('Ginny',9831);
+
+CREATE OR REPLACE TABLE calls1(
+ID INT NOT NULL,
+Caller INT NOT NULL,
+Callee INT NOT NULL,
+Duration INT NOT NULL,
+UNIQUE(ID)
+);
+
+INSERT INTO calls1 VALUES
+(65,8003,9831,7),
+(100,9831,8003,3),
+(145,4315,9831,18);
+
+SELECT * FROM phones1;
+SELECT * FROM calls1;
+
+
+SELECT Name FROM 
+(
+  WITH CTE AS
+        (SELECT Caller AS Phone_number ,SUM(Duration) AS Total_time FROM calls1
+         GROUP BY 1
+         UNION
+         SELECT Callee AS Phone_number,SUM(Duration) AS Total_time FROM calls1
+         GROUP BY 1)
+  SELECT DISTINCT(B.Name), SUM(A.Total_time) AS Total_time
+  FROM CTE AS A
+  JOIN phones1 AS B ON A.Phone_number = B.Phone_number
+  GROUP BY 1
+  ORDER BY 1 
+ )
+WHERE Total_time >= 10;
