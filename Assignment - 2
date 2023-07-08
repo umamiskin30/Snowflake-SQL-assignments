@@ -1,0 +1,72 @@
+CREATE TABLE accident(
+	accident_index VARCHAR(13),
+    accident_severity INT
+);
+
+CREATE TABLE vehicles(
+	accident_index VARCHAR(13),
+    vehicle_type VARCHAR(50)
+);
+
+CREATE OR REPLACE TABLE vehicle_types(
+	vehicle_code INT,
+    vehicle_type VARCHAR(50)
+);
+
+
+SELECT * FROM accident;
+SELECT * FROM vehicles;
+SELECT * FROM vehicle_types;
+
+SELECT DISTINCT ACCIDENT_SEVERITY FROM accident;
+
+-- 1. Evaluate the median severity value of accidents caused by various Motorcycles.
+
+SELECT  VT.VEHICLE_TYPE,ROUND(AVG(A.ACCIDENT_SEVERITY),0) AS SEVERITY_ACCIDENTS
+FROM accident AS A 
+LEFT OUTER JOIN vehicles AS V ON V.ACCIDENT_INDEX = A.ACCIDENT_INDEX 
+LEFT OUTER JOIN vehicle_types AS VT ON VT.VEHICLE_CODE = V.VEHICLE_TYPE
+WHERE VT.VEHICLE_TYPE LIKE 'Motorcycle%'
+GROUP BY 1
+ORDER BY 2
+
+
+
+
+
+--2. Evaluate Accident Severity and Total Accidents per Vehicle Type
+
+SELECT  VT.VEHICLE_TYPE,COUNT(A.ACCIDENT_SEVERITY) AS TOTAL_ACCIDENTS
+FROM accident AS A 
+LEFT OUTER JOIN vehicles AS V ON V.ACCIDENT_INDEX = A.ACCIDENT_INDEX 
+LEFT OUTER JOIN vehicle_types AS VT ON VT.VEHICLE_CODE = V.VEHICLE_TYPE
+GROUP BY 1
+ORDER BY 2
+
+
+
+-- 3. Calculate the Average Severity by vehicle type.
+
+SELECT  VT.VEHICLE_TYPE,ROUND(AVG(A.ACCIDENT_SEVERITY),0) AS SEVERITY_ACCIDENTS
+FROM accident AS A 
+LEFT OUTER JOIN vehicles AS V ON V.ACCIDENT_INDEX = A.ACCIDENT_INDEX 
+LEFT OUTER JOIN vehicle_types AS VT ON VT.VEHICLE_CODE = V.VEHICLE_TYPE
+GROUP BY 1
+ORDER BY 2
+
+
+-- 4. Calculate the Average Severity and Total Accidents by Motorcycle.
+
+SELECT  VT.VEHICLE_TYPE,ROUND(AVG(A.ACCIDENT_SEVERITY),0) AS SEVERITY_ACCIDENTS,
+COUNT(ACCIDENT_SEVERITY) AS TOTAL_ACCIDENTS
+FROM accident AS A 
+LEFT OUTER JOIN vehicles AS V ON V.ACCIDENT_INDEX = A.ACCIDENT_INDEX 
+LEFT OUTER JOIN vehicle_types AS VT ON VT.VEHICLE_CODE = V.VEHICLE_TYPE
+WHERE VT.VEHICLE_TYPE LIKE 'Motorcycle%'
+GROUP BY 1
+ORDER BY 2,3
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-- dataset by CIA World Factbook is not available
